@@ -1,25 +1,51 @@
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
+import TaskList from './components/TaskList';
 import './App.css';
 
-function App() {
+const  App=()=> {
+  const [tasks, setTasks] = useState(() => {
+    const saved = localStorage.getItem('tasks');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [input, setInput] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }, [tasks]);
+
+  const addTask = () => {
+    if (input.trim()) {
+      setTasks([...tasks, { id: Date.now(), text: input, completed: false }]);
+      setInput('');
+    }
+  };
+
+  const deleteTask = (id) => {
+    setTasks(tasks.filter(task => task.id !== id));
+  };
+
+  const toggleComplete = (id) => {
+    setTasks(tasks.map(task => task.id === id ? { ...task, completed: !task.completed } : task));
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <h1 className='task-heading'>Task Tracker</h1>
+      <div className="input-group">
+        <input
+          type="text"
+          value={input}
+          placeholder="Enter a task"
+          onChange={(e) => setInput(e.target.value)}
+        />
+        <button onClick={addTask}>Add</button>
+      </div>
+      <TaskList tasks={tasks} onDelete={deleteTask} onToggle={toggleComplete} />
     </div>
   );
 }
 
 export default App;
+
+
+
